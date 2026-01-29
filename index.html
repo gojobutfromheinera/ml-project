@@ -3,23 +3,20 @@
 <head>
 <meta charset="UTF-8">
 <title>AI Course Recommender</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="relative min-h-screen overflow-y-auto bg-gradient-to-br from-black via-gray-900 to-purple-950 flex items-start justify-center p-4">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-
-
 
 <!-- PARTICLE BACKGROUND -->
 <div class="particles"></div>
 
 <div class="relative z-10 bg-black/80 backdrop-blur-xl p-5 sm:p-8 rounded-3xl shadow-[0_0_45px_#7c3aed] w-full max-w-full sm:max-w-7xl">
 
-
 <h1 class="text-4xl font-bold text-center text-white mb-2">🎓 AI Course Recommendation</h1>
 <p class="text-center text-gray-400 mb-6">
-Find the bdivest online courses based on your interests! <br> <b>For examples:</b>
+Find the best online courses based on your interests!
 </p>
 
 <!-- Allowed Fields -->
@@ -51,93 +48,121 @@ Find Courses
 </div>
 
 <script>
-/* UNSUPERVISED SIMILARITY MATCHING */
+/* =======================
+   UNSUPERVISED ML PART
+   WEIGHT + BIAS NEURON
+   ======================= */
 
+// Knowledge base (features)
 const fields = {
-  python: "python programming py python developer python course python language",
-  ai: "artificial intelligence ai machine learning ml deep learning ai ml artificial neural network",
-  web: "web development web developer java frontend backend full stack html css javascript react",
-  data: "data science analytics data scientist ds aids big data data mining",
-  design: "ui ux ui ux design product design figma user experience",
-  cloud: "cloud aws amazon web services cybersecurity devops cloud computing blockchain fundamentals Blockchain azure gcp"
+  python: "python programming py python developer python course language",
+  ai: "artificial intelligence ai machine learning ml deep learning neural network",
+  web: "web development web developer html css javascript react frontend backend",
+  data: "data science analytics data mining big data machine learning",
+  design: "ui ux design figma user experience product design",
+  cloud: "cloud aws devops blockchain azure gcp cybersecurity"
 };
 
+// Weights and Bias (Neuron parameters)
+const model = {
+  python: { w: 1.2, b: 0.5 },
+  ai:     { w: 1.5, b: 0.7 },
+  web:    { w: 1.1, b: 0.3 },
+  data:   { w: 1.4, b: 0.6 },
+  design: { w: 1.0, b: 0.2 },
+  cloud:  { w: 1.3, b: 0.4 }
+};
+
+// Course database
 const courses = {
   python: [
-    {name:"Complete Python Bootcamp",img:"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1351.jpg",link:"https://www.udemy.com/share/10cW5V3@lHYza42Y3M6M3uN0Fa_cyBLG016w8FcFLlwEMZPJOKwovdiAYVid-67X7WzUFuuMPA==/"},
-    {name:"Python for Beginners",img:"https://img.freepik.com/free-vector/coding-concept-illustration_114360-939.jpg",link:"https://www.udemy.com/share/101rjw3@82GoyoOnIkvXWK-yB6OcpXkSCT6vTfZc0bkWPt_J8U8jBswHl3YKWWmxWMFoRwv-_A==/"},
-    {name:"Advanced Python Programming",img:"https://img.freepik.com/free-vector/software-development-concept_114360-2001.jpg",link:"https://www.udemy.com/share/10cSmF3@x0LGI16D0KTL3e4PGgWPZW_nJsp3kXf3fHik4dCvwjSrY7LWUShJApgWChR0ZWn28g==/"},
-    {name:"Python Masterclass",img:"https://img.freepik.com/free-vector/app-development-concept_114360-5161.jpg",link:"https://www.udemy.com/share/10cvLt3@NivtQGuLwvftALp6dkEgQajOfCTX0rAkqT5FEOZTn9N9KePfJc0LqdB6F2MVgR4C4w==/"}
+    {name:"Complete Python Bootcamp",img:"https://img.freepik.com/free-vector/programming-concept-illustration_114360-1351.jpg",link:"https://www.udemy.com/"},
+    {name:"Python for Beginners",img:"https://img.freepik.com/free-vector/coding-concept-illustration_114360-939.jpg",link:"https://www.udemy.com/"},
+    {name:"Advanced Python Programming",img:"https://img.freepik.com/free-vector/software-development-concept_114360-2001.jpg",link:"https://www.udemy.com/"},
+    {name:"Python Masterclass",img:"https://img.freepik.com/free-vector/app-development-concept_114360-5161.jpg",link:"https://www.udemy.com/"}
   ],
 
   ai: [
-    {name:"Artificial Intelligence A–Z",img:"https://img.freepik.com/free-vector/artificial-intelligence-concept_114360-7001.jpg",link:"https://www.udemy.com/share/102vAM3@TEIIfQbfMTYmWO9WBwyP5g8eeXkEXfwPucMT8MNIBmxTzarW9zz-z6G1NU35aCHadg==/"},
-    {name:"Machine Learning Bootcamp",img:"https://img.freepik.com/free-vector/machine-learning-concept_114360-1000.jpg",link:"https://www.udemy.com/share/10bH9r3@g0JfXmzfOdXf0H8PCMLj4c88fPkDTlJ9n49u0lkuAWPPjX1LBo3aFTfp-aYqgSr7fw==/"},
-    {name:"Deep Learning Mastery",img:"https://img.freepik.com/free-vector/deep-learning-concept_114360-1022.jpg",link:"https://www.udemy.com/share/109OPO3@zIff6weIojNzdy0HmucjPBsimRxXp5aAy-KcFVanjDHtNImgrwDJMRKNlP_4T3e5Ng==/"},
-    {name:"AI & ML Complete Guide",img:"https://img.freepik.com/free-vector/neural-network-concept_114360-2571.jpg",link:"https://www.udemy.com/share/10bYlh3@OkbqIYjUASSos4ut853HE7PT40a3Ku7E0PD42Y1CEIZ-O4gJjSpGsDeo32tMGdtAJw==/"}
+    {name:"Artificial Intelligence A–Z",img:"https://img.freepik.com/free-vector/artificial-intelligence-concept_114360-7001.jpg",link:"https://www.udemy.com/"},
+    {name:"Machine Learning Bootcamp",img:"https://img.freepik.com/free-vector/machine-learning-concept_114360-1000.jpg",link:"https://www.udemy.com/"},
+    {name:"Deep Learning Mastery",img:"https://img.freepik.com/free-vector/deep-learning-concept_114360-1022.jpg",link:"https://www.udemy.com/"},
+    {name:"AI & ML Complete Guide",img:"https://img.freepik.com/free-vector/neural-network-concept_114360-2571.jpg",link:"https://www.udemy.com/"}
   ],
 
   web: [
-    {name:"Full Stack Web Development",img:"https://img.freepik.com/free-vector/web-development-concept_114360-1220.jpg",link:"https://www.udemy.com/share/10cFmn3@uPChDHGWGZdjkYfsUpMd5xszPobbRWx28wD0iQruFNmueWsR6qZJZeXC9l57LGaKNg==/"},
-    {name:"HTML CSS JavaScript",img:"https://img.freepik.com/free-vector/frontend-concept-illustration_114360-2221.jpg",link:"https://www.udemy.com/share/101W9C3@pxXXA12uggCjCCRSdEa4EmYCvCMgc6YlMZJLXiZVBUD8VCy3Z078oSerxYnyzu0r7Q==/"},
-    {name:"Modern Web Developer",img:"https://img.freepik.com/free-vector/web-design-concept_114360-1083.jpg",link:"https://www.udemy.com/share/10cLgP3@J7flzuPVzNvKF1Od-IHEpXw_E8WYhWTEOGNqpS1I9mrxS0TkatSiPx6TV4UkH9AtPQ==/"},
-    {name:"Frontend & Backend Mastery",img:"https://img.freepik.com/free-vector/programmer-concept_114360-2284.jpg",link:"https://www.udemy.com/share/101WRi3@qqFmoJJbtTgipFQgZrJwlmWE-USNOLUcz1GE07il0ZCzYRK_y9xg9_EmnXVCUeAskw==/"}
+    {name:"Full Stack Web Development",img:"https://img.freepik.com/free-vector/web-development-concept_114360-1220.jpg",link:"https://www.udemy.com/"},
+    {name:"HTML CSS JavaScript",img:"https://img.freepik.com/free-vector/frontend-concept-illustration_114360-2221.jpg",link:"https://www.udemy.com/"},
+    {name:"Modern Web Developer",img:"https://img.freepik.com/free-vector/web-design-concept_114360-1083.jpg",link:"https://www.udemy.com/"},
+    {name:"Frontend & Backend Mastery",img:"https://img.freepik.com/free-vector/programmer-concept_114360-2284.jpg",link:"https://www.udemy.com/"}
   ],
 
   data: [
-    {name:"Data Science Bootcamp",img:"https://img.freepik.com/free-vector/data-analysis-concept_114360-8050.jpg",link:"https://www.udemy.com/share/10e5ud3@fYZjs01EDW0m0RcjytoFCi3M2b3QPs2UEHyNnQTz5-Bb0i_pQdti92M4HMU-BICElA==/"},
-    {name:"Data Analytics with Python",img:"https://img.freepik.com/free-vector/data-analytics-concept_114360-5211.jpg",link:"https://www.udemy.com/share/10cD673@eFk-PTMqGAuvV45uaEv9kZP4cTgrhoxN4kmU8IaeskRpG71phvb8KYlU-qXSMl3zzg==/"},
-    {name:"Machine Learning for Data Science",img:"https://img.freepik.com/free-vector/big-data-concept_114360-4180.jpg",link:"https://www.udemy.com/share/102vAM3@QRmhQneiAYVLO3lyY2HC4q0q3gTRGxB-Aa_rZ6hUAO_zxl53AtxAXyLqbGd39egLzQ==/"},
-    {name:"Complete Data Scientist Guide",img:"https://img.freepik.com/free-vector/database-concept_114360-579.jpg",link:"https://www.udemy.com/share/10dnPl3@KtDpsVLs1QSekEPqiP-MvoDUJKD-kwUdgw8aFhV86oc7MFBKYD5dSh8vRB1D-FvJmQ==/"}
+    {name:"Data Science Bootcamp",img:"https://img.freepik.com/free-vector/data-analysis-concept_114360-8050.jpg",link:"https://www.udemy.com/"},
+    {name:"Data Analytics with Python",img:"https://img.freepik.com/free-vector/data-analytics-concept_114360-5211.jpg",link:"https://www.udemy.com/"},
+    {name:"ML for Data Science",img:"https://img.freepik.com/free-vector/big-data-concept_114360-4180.jpg",link:"https://www.udemy.com/"},
+    {name:"Complete Data Scientist Guide",img:"https://img.freepik.com/free-vector/database-concept_114360-579.jpg",link:"https://www.udemy.com/"}
   ],
 
   design: [
-    {name:"UI UX Design Bootcamp",img:"https://img.freepik.com/free-vector/ui-ux-concept_114360-701.jpg",link:"https://www.udemy.com/share/103F1h3@_7mz0KwWKemFmOZRdQocl-A4U7V_0gaeF8ZRen2eEmuNhED11RalcjhY_EmpOs9VqQ==/"},
-    {name:"Figma UI UX Mastery",img:"https://img.freepik.com/free-vector/app-interface-concept_114360-472.jpg",link:"https://www.udemy.com/share/10dboB3@9gS9KTE39PWu_VV-djdd9si8qsdbWNMs7iA5ZIgeQY0qOymCstxU1grDFsQbw300JA==/"},
-    {name:"UX Research & Design",img:"https://img.freepik.com/free-vector/design-thinking-concept_114360-285.jpg",link:"https://www.udemy.com/share/102fMG3@4y62yq-IPRRVVeIQ8i46gnGBx84_FllmsmPD3Bp3dpBkeZtpGEXQeO9Ba8u1uCIPPA==/"},
-    {name:"Complete UI UX Guide",img:"https://img.freepik.com/free-vector/creative-design-concept_114360-1745.jpg",link:"https://www.udemy.com/share/106el63@kinPooDjKB7h690W9J4BYj8MT1HmjufGKWn8tGRFyNsgNpNo8lzhcEOD2_AWoh-btA==/"}
+    {name:"UI UX Design Bootcamp",img:"https://img.freepik.com/free-vector/ui-ux-concept_114360-701.jpg",link:"https://www.udemy.com/"},
+    {name:"Figma UI UX Mastery",img:"https://img.freepik.com/free-vector/app-interface-concept_114360-472.jpg",link:"https://www.udemy.com/"},
+    {name:"UX Research & Design",img:"https://img.freepik.com/free-vector/design-thinking-concept_114360-285.jpg",link:"https://www.udemy.com/"},
+    {name:"Complete UI UX Guide",img:"https://img.freepik.com/free-vector/creative-design-concept_114360-1745.jpg",link:"https://www.udemy.com/"}
   ],
 
   cloud: [
-    {name:"AWS Cloud Practitioner",img:"https://img.freepik.com/free-vector/cloud-computing-concept_114360-234.jpg",link:"https://www.udemy.com/share/106WtA3@mZUqZhPfLvUHdvizvsRqRGrPko6ka_Qg4bj-IyEU87G6Jzbm_MofRxIz5wlkuGIiBA==/"},
-    {name:"DevOps & Cloud Engineering",img:"https://img.freepik.com/free-vector/devops-concept-illustration_114360-1031.jpg",link:"https://staragile.com/devops/devops-certification-training?utm_source=google_search&utm_medium=cpc&utm_campaign=DevOps_Exact_Keywords_05Dec25&gad_source=1&gad_campaignid=23333026463&gbraid=0AAAAADPiHN9iUD2JDVwIHvSz2frHoRsw8&gclid=Cj0KCQiAhOfLBhCCARIsAJPiopMJs917MSI_fBaglx7RT0TnxpMeGKrxTmCWsHsjJsBVVOw5D64QGC4aAp9tEALw_wcB"},
-    {name:"Cloud Computing Masterclass",img:"https://img.freepik.com/free-vector/data-center-concept-illustration_114360-1406.jpg",link:"https://intellipaat.com/course-cat/cloud-computing-courses/?utm_source=google&utm_medium=display&utm_campaign=p_performance-max_generic_in_secondary_new&gad_source=1&gad_campaignid=17753748149&gbraid=0AAAAADqDZ6M_KMu0GffGPO4dai8snx3b3&gclid=Cj0KCQiAhOfLBhCCARIsAJPiopMZtSSQlaoRcnT2u3CLaEP2gpzCOTo00vVJCo3sKcrcaYs6jL5Cv_IaAtcEEALw_wcB"},
-    {name:"Blockchain Fundamentals",img:"https://img.freepik.com/free-vector/blockchain-concept_114360-200.jpg",link:"https://www.coursera.org/specializations/blockchain-basics"}
+    {name:"AWS Cloud Practitioner",img:"https://img.freepik.com/free-vector/cloud-computing-concept_114360-234.jpg",link:"https://www.udemy.com/"},
+    {name:"DevOps & Cloud Engineering",img:"https://img.freepik.com/free-vector/devops-concept-illustration_114360-1031.jpg",link:"https://www.udemy.com/"},
+    {name:"Cloud Computing Masterclass",img:"https://img.freepik.com/free-vector/data-center-concept-illustration_114360-1406.jpg",link:"https://www.udemy.com/"},
+    {name:"Blockchain Fundamentals",img:"https://img.freepik.com/free-vector/blockchain-concept_114360-200.jpg",link:"https://www.udemy.com/"}
   ]
 };
 
-function cleanText(t){
-  return t.toLowerCase().replace(/(.)\1+/g,"$1").replace(/[^a-z ]/g,"");
+// Text preprocessing
+function cleanText(text){
+  return text.toLowerCase().replace(/[^a-z ]/g,"");
 }
 
-function similarity(a,b){
-  let s=0;
-  a.split(" ").forEach(w=>{ if(b.includes(w)) s++; });
-  return s;
+// Neuron scoring (WEIGHT + BIAS)
+function neuronScore(input, fieldText, weight, bias){
+  let sum = 0;
+  input.split(" ").forEach(word=>{
+    if(fieldText.includes(word)){
+      sum += weight;
+    }
+  });
+  return sum + bias;
 }
 
+// Recommendation function
 function recommend(){
-  const input=cleanText(document.getElementById("search").value);
-  const res=document.getElementById("result");
-  const msg=document.getElementById("msg");
-  res.innerHTML="";
-  msg.textContent="";
+  const input = cleanText(document.getElementById("search").value);
+  const res = document.getElementById("result");
+  const msg = document.getElementById("msg");
 
-  let best=null,score=0;
+  res.innerHTML = "";
+  msg.textContent = "";
+
+  let best = null;
+  let maxScore = -Infinity;
+
   for(let f in fields){
-    let sc=similarity(input,fields[f]);
-    if(sc>score){score=sc;best=f;}
+    let score = neuronScore(input, fields[f], model[f].w, model[f].b);
+    if(score > maxScore){
+      maxScore = score;
+      best = f;
+    }
   }
 
-  if(!best){
-    msg.textContent="❌ Sorry, we couldn’t understand your interest.";
+  if(!best || maxScore <= 0){
+    msg.textContent = "❌ Sorry, we couldn’t understand your interest.";
     return;
   }
 
-  msg.textContent="✅ Based on your interest, we found these courses for you 👇";
+  msg.textContent = "✅ Based on your interest, we found these courses for you 👇";
 
   courses[best].forEach(c=>{
-    res.innerHTML+=`
+    res.innerHTML += `
     <div class="bg-gray-900 rounded-2xl overflow-hidden transition hover:scale-105 hover:shadow-[0_0_30px_#a855f7]">
       <img src="${c.img}" class="h-40 w-full object-cover">
       <div class="p-4 text-white">
@@ -150,22 +175,34 @@ function recommend(){
   });
 }
 
-// ENTER KEY SUPPORT
+// Enter key support
 document.getElementById("search").addEventListener("keydown", e=>{
-  if(e.key==="Enter") recommend();
+  if(e.key === "Enter") recommend();
 });
 </script>
 
 <style>
-.chip{padding:6px 14px;border-radius:9999px;border:1px solid #a855f7;color:#e9d5ff;background:rgba(168,85,247,.2)}
-.particles::before,.particles::after{
-content:"";position:absolute;inset:0;
-background:radial-gradient(circle at 20% 30%,rgba(168,85,247,.15),transparent 40%),
-radial-gradient(circle at 80% 70%,rgba(236,72,153,.15),transparent 40%);
-animation:float 10s linear infinite;
+.chip{
+  padding:6px 14px;
+  border-radius:9999px;
+  border:1px solid #a855f7;
+  color:#e9d5ff;
+  background:rgba(168,85,247,.2);
 }
-@keyframes float{0%{transform:translateY(0)}50%{transform:translateY(-30px)}100%{transform:translateY(0)}}
-
+.particles::before,.particles::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background:
+  radial-gradient(circle at 20% 30%,rgba(168,85,247,.15),transparent 40%),
+  radial-gradient(circle at 80% 70%,rgba(236,72,153,.15),transparent 40%);
+  animation:float 10s linear infinite;
+}
+@keyframes float{
+  0%{transform:translateY(0)}
+  50%{transform:translateY(-30px)}
+  100%{transform:translateY(0)}
+}
 </style>
 
 </body>
